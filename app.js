@@ -12,7 +12,7 @@ let soundOn=false,audioCtx=null,busy=false,lastCount=1,pending=[],isDemo=false,t
 function random(){const a=new Uint32Array(1);crypto.getRandomValues(a);return a[0]/4294967296;}
 function drawCandidate(){let pick=random()*100;let rank=RANKS.at(-1);for(const r of RANKS){pick-=r.weight;if(pick<0){rank=r;break;}}const list=buckets[rank.name];return list[Math.floor(random()*list.length)];}
 function save(){try{localStorage.setItem('forbidden-pages-v1',JSON.stringify({owned,pulls:pullCount}));}catch{toast('記録を保存できません。この回の召喚は続けられます。');}updateCount();}
-function updateCount(){const totalLabel=$('#candidateTotal');if(totalLabel)totalLabel.textContent=candidates.length;$('#collectionCount').textContent=String(candidates.filter(c=>owned[c.id]).length).padStart(2,'0');$('#collectionProgress').textContent=`${candidates.filter(c=>owned[c.id]).length} / ${candidates.length}`;$('#resetCollectionBtn').disabled=Object.keys(owned).length===0&&pullCount===0;}
+function updateCount(){const totalLabel=$('#candidateTotal');if(totalLabel)totalLabel.textContent=candidates.length;$('#collectionCount').textContent=String(candidates.filter(c=>owned[c.id]).length).padStart(2,'0');$('#collectionProgress').textContent=`${candidates.filter(c=>owned[c.id]).length} / ${candidates.length}`;$('#resetCollectionBtn').disabled=Object.keys(owned).length===0&&pullCount===0;const complete=candidates.every(c=>owned[c.id]);$('#unlockAllBtn').disabled=complete;$('#unlockAllBtn').textContent=complete?'すべて解放済み':'すべての存在を解放';}
 function toast(text){$('#toast').textContent=text;$('#toast').classList.add('show');setTimeout(()=>$('#toast').classList.remove('show'),3000);}
 const descriptions={G001:'海底の都ルルイエにて、永い夢を見つづけるもの。',G002:'千の顔を持つ、這い寄る混沌。今宵はどんな姿で現れるのか。',G003:'光の絶えた場所から、闇そのものがあなたを見つめる。',G004:'魔女たちが集う夜、異界への契約を携えて現れる。',G005:'時も形も届かぬ中心で、混沌は盲目のまま渦を巻く。',G006:'門にして鍵。過去も未来も、その内にひとつとなる。',G007:'森の奥から響く、千の仔を孕むものへの呼び声。',G008:'大いなる深淵の主。原初の海を越えて、その角笛が響く。',G009:'海の底に、忘れられた信仰がいまも息づいている。',G010:'深い水の向こうで、海の民がその母の名を呼ぶ。',G011:'湖面に映る月は、滅びた都の記憶を知っている。',G015:'夢の都セレファイス。その神殿に捧げられる、変わらぬ祈り。',G016:'夢と現実の境を越えた先で、眠りの神が微笑む。',G017:'霧の向こうから来た、三叉槍を携える海の神。',G018:'雲よりも高い峰で、地上の神々は月夜に踊る。',G019:'地上の神々さえ恐れる、世界の外側のものたち。',G020:'最後の門の前で、太古からの案内者があなたを待つ。',G022:'見ることさえ許されぬ姿が、沈んだ大陸の記憶に潜む。',G023:'古き蛇の神の名は、いまも禁じられた伝承に残る。',G026:'暗く形定まらぬ神を、人ならざる民は崇めた。',G030:'潮の匂いの向こうに、海の底へ続く道がある。',G031:'その町の人々には、海から受け継いだ面影がある。',G032:'星々のあいだを渡る、地上の生命とは異なる来訪者。',G033:'人類の誕生よりも前、氷の大陸に文明を築いたもの。',G034:'暗い坑道を満たす、形なき生命のうねり。',G035:'遠い宇宙から降り立った、太古の戦いの担い手。',G036:'時間を越える知性が、歴史の彼方からあなたを観察する。',G037:'地の底を吹き抜ける風には、姿のない敵意がある。',G038:'どんな絵具にも、どんな言葉にも還元できない「色」。',G039:'墓地の下には、人の知らないもうひとつの世界がある。',G040:'顔のない翼が音もなく広がり、あなたを夢の深部へ運ぶ。',G041:'人の知る鳥には似ぬ巨翼が、夜空を覆う。',G043:'地下の巨人の口は、見慣れた方向には開かない。',G045:'月へと続く航路に、触手を持つ異形が待ち受ける。',G048:'骨に覆われた深淵で、途方もないものが地を掘り進む。',G049:'この町では、何者も猫を殺すなかれ。',G050:'地球の猫たちが警戒する、遥か遠い星の猫。',G052:'異星の街にも、長い年月を生きる知性がある。',G054:'ウェイトリィ家に生まれた子には、隠しきれない秘密がある。',G056:'魔女とともにニャルラトホテプに仕え、異界へと誘う、人の顔を持つ使い魔。',G057:'暴かれた墓の向こうから、その遠吠えは近づいてくる。',G060:'砂漠の下の都市には、人類よりも古い住人の記憶が眠る。',G064:'暗闇の洞窟に足音が響く。それは救いか、それとも。',G066:'死の境界を越えた実験は、取り返しのつかない答えを生む。',G067:'その家では、人が衰弱してゆく。原因は、まだ地下にある。',G075:'老人は、小さな瓶に向かって名を呼びかける。',G076:'壁の内側から聞こえる音は、あなたにしか届かない。',G077:'禁じられた知識の中に、恐るべき猟犬の名が記されている。',G083:'失われた美しい都を求め、夢の世界を旅する人。',G084:'現実では失われたものを、夢の都で取り戻した王。',G085:'彼の描く怪物は、なぜこれほどまでに生々しいのか。',G086:'死は、克服できる。そう信じた医師の実験記録。',G087:'古い肖像画の男は、死者から秘密を聞き出そうとした。',G088:'幾何学の向こうにある道を、魔女は知っていた。',G091:'瓶に語りかける老人には、近づかないほうがよい。',G092:'窓の外の何かに抗うように、今夜も異様な旋律が響く。',G093:'神々を見に登った山の記憶を、老いた祭司は語る。',G094:'神々の顔を見たい。その願いは、禁じられた峰へと向かう。',G095:'禁じられた書に、その詩人の名は永遠に刻まれた。',G096:'ヤディスの魔術師。その生は、ひとりの夢見る者と交錯する。',G097:'恐るべき神に立ち向かった祭司の、時を越える記録。',G100:'書物の知識を手がかりに、ダンウィッチの怪異に挑む学者。',G102:'神々を造ったものは、いまも眠りつづけている。',G103:'世界がつづくあいだ、鼓手の腕が休まることはない。',G130:'始まりより前。世界を賭けた投擲の行方を、誰も知らない。',G131:'世界は、ひとつの偶然から始まったのかもしれない。',G149:'その戯曲の第二幕を、読んではいけない。',G153:'カルコサ、ハリの湖、そしてハスター。その名の意味は霧に包まれている。'};
 Object.assign(descriptions,{"G044": "光の届かない地下で、飢えたものたちが跳ね回る。", "G046": "遥かな高原レン。人に似た住人には、隠しきれない特徴がある。", "G053": "薄明の海の底に、髭と鰭を持つ民の迷宮がある。", "G062": "雷鳴の夜、古い館の地下から何かが這い出す。", "G065": "暗い城を抜け、初めて外の世界へ。その先で出会うものは。", "G072": "湿原の夜に葦笛が響き、忘れられたものたちが踊る。", "G073": "眠りの壁を越え、遥かな光の存在が語りかける。", "G090": "異様に冷たい部屋で暮らす医師。その温度には理由がある。", "G098": "ある一族を襲う死の呪い。その背後には、錬金術師の執念がある。", "G099": "霧の上の家で、海と夢の物語を知る主が訪問者を迎える。"});
@@ -96,12 +96,41 @@ function resetCollection(){
  owned={};pullCount=0;pending=[];lastResults=[];lastCount=1;detailReturn=false;isDemo=false;activeRank='ALL';
  renderCollection();$('#resetDialog').close();$('#collectionBtn').focus();toast('蒐集の記録をリセットしました。新しい一頁から始めましょう。');
 }
+let apocalypseState=null,apocalypseTimers=[];
+function openUnlockAll(){if(busy||candidates.every(c=>owned[c.id]))return;$('#unlockTotal').textContent=candidates.length;$('#unlockError').textContent='';$('#unlockError').classList.add('hidden');$('#unlockDialog').showModal();$('#cancelUnlockBtn').focus();}
+function cancelUnlockAll(){$('#unlockDialog').close();$('#unlockAllBtn').focus();}
+function unlockAll(){
+ if(busy||candidates.every(c=>owned[c.id]))return;
+ const nextOwned={...owned};for(const c of candidates)if(!nextOwned[c.id])nextOwned[c.id]=1;
+ try{localStorage.setItem('forbidden-pages-v1',JSON.stringify({owned:nextOwned,pulls:pullCount}));}
+ catch{$('#unlockError').textContent='全解放を保存できませんでした。ブラウザの保存設定を確認して、もう一度お試しください。';$('#unlockError').classList.remove('hidden');return;}
+ owned=nextOwned;$('#unlockDialog').close();renderCollection();startApocalypse();
+}
+function apocalypseStage(phase,en,text,hint){const scene=$('#apocalypse');scene.className='apocalypse '+phase;$('#apocalypseEnglish').textContent=en;$('#apocalypseText').textContent=text;$('#apocalypseHint').textContent=hint;if(apocalypseState)apocalypseState.phase=phase;}
+function startApocalypse(){
+ busy=true;document.body.style.overflow='hidden';$('#apocalypseCompletion').classList.add('hidden');$('#apocalypseSkip').disabled=true;$('#apocalypseSkip').classList.remove('hidden');
+ $('#doomPages').innerHTML=Array.from({length:24},(_,i)=>`<i style="--i:${i};--hue:${i*37}"><span>ᚷ ᛟ ᚾ<br>ᛉ ᚷ ᛟ<br>ᚾ ᛉ ᚷ</span></i>`).join('');
+ const icons=RANKS.flatMap(r=>buckets[r.name].slice(0,3));$('#chaosOrbits').innerHTML=icons.map((c,i)=>`<div class="chaos-entity" style="--i:${i};--angle:${i*360/icons.length}deg;--rank:${rankInfo(c.rarity).color}">${entityArt(c)}</div>`).join('');
+ apocalypseState={start:performance.now(),phase:'awakening'};apocalypseStage('awakening','THE LAST FORBIDDEN PAGE','一頁では、足りない。','今宵、すべてをひらく。');
+ const after=(ms,fn)=>apocalypseTimers.push(setTimeout(fn,ms));
+ after(500,()=>{$('#apocalypseSkip').disabled=false;$('#apocalypseSkip').focus();});
+ if(reduced){after(1100,finishApocalypse);return;}
+ audioTone(36.7,2,0,'sine',.1);audioTone(55,2,.2,'triangle',.04);
+ after(1400,()=>{apocalypseStage('unbinding','ALL SIX SEALS / BROKEN','六つの封印が、砕ける。','神々も、怪物も、名を持たぬものも。');[65.4,98,130.8,196,261.6,392].forEach((f,i)=>audioTone(f,2,i*.13,'triangle',.025));});
+ after(3300,()=>{apocalypseStage('rupture','THE WORLD IS COMING UNDONE','世界の綴じ目が、裂ける。','頁は嵐となり、すべての境界を呑み込む。');audioTone(30,3,0,'sine',.12);audioTone(43.65,2.8,.1,'sawtooth',.018);});
+ after(5500,()=>{apocalypseStage('annihilation','BEYOND EVERY NAME / BEYOND EVERY GOD','秩序よ、終われ。','星も、時も、運命も。この一冊へ。');[32.7,49,65.4,98].forEach((f,i)=>audioTone(f,2,i*.12,'triangle',.04));});
+ after(7400,()=>{apocalypseStage('revelation','THE INFINITE ARCHIVE','すべてが、ここに。','最後の禁忌が、いま解き放たれる。');[130.8,196,261.6,329.6,392,523.25].forEach((f,i)=>audioTone(f,2,i*.08,'sine',.025));});
+ after(9200,finishApocalypse);
+}
+function finishApocalypse(){if(!apocalypseState)return;apocalypseTimers.forEach(clearTimeout);apocalypseTimers=[];apocalypseState=null;busy=false;$('#apocalypse').className='apocalypse complete';$('#apocalypseSkip').classList.add('hidden');$('#apocalypseCompletion').classList.remove('hidden');$('#apocalypseTotal').textContent=`${candidates.length} / ${candidates.length}`;$('#apocalypseArchiveBtn').focus();}
+function closeApocalypse(){if(apocalypseState)finishApocalypse();$('#apocalypse').classList.add('hidden');document.body.style.overflow='';selectTab(true);$('#collectionBtn').focus();}
 function openInfo(demo=false){$('#dialogEyebrow').textContent=demo?'RITUAL PREVIEW':'SUMMONING RATES';$('#dialogBody').innerHTML=demo?`<h2>異界の気配を、選ぶ。</h2><p>各ランクの演出をお試しいただけます。<br>プレビューの結果は蒐集の書に記録されません。</p><div class="demo-options">${RANKS.map(r=>`<button data-demo="${r.name}" style="--rank:${r.color}">${r.name}</button>`).join('')}</div>`:`<h2>邂逅の確率</h2>${RANKS.map(r=>`<div class="rate-row" style="--rank:${r.color}"><span>${r.name}</span><div class="rate-bar"><i style="width:${r.weight*2}%"></i></div><span>${r.weight}%</span></div>`).join('')}<p>最初にランクを抽選し、そのランク内では各存在を等しい確率で選びます。毎回独立した抽選で、10連の確定枠や回数による保証はありません。</p><p>無料・回数制限なし。全${candidates.length}候補。Hiddenは${buckets.Hidden.length}候補あり、特定の1候補が出る確率は${Number((rankInfo('Hidden').weight/buckets.Hidden.length).toPrecision(8))}%です。</p>`;$('#infoDialog').showModal();}
+$('#unlockAllBtn').onclick=openUnlockAll;$('#cancelUnlockBtn').onclick=cancelUnlockAll;$('#confirmUnlockBtn').onclick=unlockAll;$('#unlockDialog').addEventListener('cancel',()=>$('#unlockAllBtn').focus());$('#apocalypseSkip').onclick=()=>{if(!$('#apocalypseSkip').disabled)finishApocalypse();};$('#apocalypseArchiveBtn').onclick=closeApocalypse;
 $('#resetCollectionBtn').onclick=openCollectionReset;$('#cancelResetBtn').onclick=cancelCollectionReset;$('#confirmResetBtn').onclick=resetCollection;$('#resetDialog').addEventListener('cancel',()=>$('#resetCollectionBtn').focus());
 $('#summonOne').onclick=()=>startSummon(1);$('#summonTen').onclick=()=>startSummon(10);$('#skipBtn').onclick=()=>{if(!$('#skipBtn').disabled)finishSummon();};$('#againBtn').onclick=()=>isDemo?startSummon(1,pending[0].rarity):startSummon(lastCount);$('#backBtn').onclick=()=>{closeResults();selectTab(false);};$('#closeResult').onclick=closeResults;$('#homeBtn').onclick=()=>selectTab(false);$('#collectionBtn').onclick=()=>selectTab(true);$('.brand').onclick=e=>{e.preventDefault();selectTab(false);};$('#ratesBtn').onclick=()=>openInfo(false);$('#closeDialog').onclick=()=>$('#infoDialog').close();$('#infoDialog').addEventListener('click',e=>{if(e.target===$('#infoDialog')){const r=e.target.getBoundingClientRect();if(e.clientX<r.left||e.clientX>r.right||e.clientY<r.top||e.clientY>r.bottom)e.target.close();}});
 $('#soundBtn').onclick=()=>{soundOn=!soundOn;$('#soundBtn').setAttribute('aria-pressed',String(soundOn));$('#soundBtn').setAttribute('aria-label',soundOn?'音をオフにする':'音をオンにする');$('#soundLabel').textContent=soundOn?'SOUND ON':'SOUND OFF';$('#soundIcon').textContent=soundOn?'◉':'◌';if(soundOn)audioTone(220,.3);else stopAudio();};
 document.addEventListener('click',e=>{if(e.target.closest('#backToBatch')){detailReturn=false;showResults(lastResults,isDemo);return;}const demo=e.target.closest('[data-demo]');if(demo){startSummon(1,demo.dataset.demo);return;}const f=e.target.closest('[data-filter]');if(f){activeRank=f.dataset.filter;renderCollection();return;}if(e.target.closest('#firstSummon')){startSummon(1);return;}const card=e.target.closest('[data-entity]');if(card){const c=candidates.find(c=>c.id===card.dataset.entity);if(!c)return;if($('#results').classList.contains('hidden')){previousFocus=card;lastCount=1;isDemo=false;pending=[c];document.body.style.overflow='hidden';}detailReturn=true;showResults([c],isDemo);}});
-document.addEventListener('keydown',e=>{if(e.key==='Escape'){if(busy){e.preventDefault();if(!$('#skipBtn').disabled)finishSummon();}else if(!$('#results').classList.contains('hidden'))closeResults();}if(e.key==='Tab'){const modal=!$('#summoning').classList.contains('hidden')?$('#summoning'):!$('#results').classList.contains('hidden')?$('#results'):null;if(!modal)return;const focusable=[...modal.querySelectorAll('button,a[href]')].filter(x=>!x.disabled&&x.getClientRects().length);const first=focusable[0],last=focusable.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
+document.addEventListener('keydown',e=>{if(!$('#apocalypse').classList.contains('hidden')){if(e.key==='Escape'){e.preventDefault();if(apocalypseState){if(!$('#apocalypseSkip').disabled)finishApocalypse();}else closeApocalypse();}if(e.key==='Tab'){e.preventDefault();(apocalypseState?$('#apocalypseSkip'):$('#apocalypseArchiveBtn')).focus();}return;}if(e.key==='Escape'){if(busy){e.preventDefault();if(!$('#skipBtn').disabled)finishSummon();}else if(!$('#results').classList.contains('hidden'))closeResults();}if(e.key==='Tab'){const modal=!$('#summoning').classList.contains('hidden')?$('#summoning'):!$('#results').classList.contains('hidden')?$('#results'):null;if(!modal)return;const focusable=[...modal.querySelectorAll('button,a[href]')].filter(x=>!x.disabled&&x.getClientRects().length);const first=focusable[0],last=focusable.at(-1);if(e.shiftKey&&document.activeElement===first){e.preventDefault();last.focus();}else if(!e.shiftKey&&document.activeElement===last){e.preventDefault();first.focus();}}});
 /* Ambient stars and the summoning particle field are drawn without external assets. */
 const canvas=$('#cosmos'),ctx=canvas.getContext('2d'),ritual=$('#ritualCanvas'),rctx=ritual.getContext('2d');let width=0,height=0,dpr=1,stars=[],ritualState=null,lastFrame=0;
 function resize(){dpr=Math.min(devicePixelRatio||1,2);width=innerWidth;height=innerHeight;for(const c of [canvas,ritual]){c.width=width*dpr;c.height=height*dpr;}ctx.setTransform(dpr,0,0,dpr,0,0);rctx.setTransform(dpr,0,0,dpr,0,0);stars=Array.from({length:Math.min(140,Math.floor(width/9))},()=>({x:random()*width,y:random()*height,r:random()*1.1+.2,t:random()*6.28,s:random()*.15+.04}));}
@@ -145,10 +174,29 @@ function paintRitual(now){
  }
  rctx.lineWidth=1;rctx.globalAlpha=1;
 }
+function paintApocalypse(now){
+ const c=$('#apocalypseCanvas'),g=c.getContext('2d');if(c.width!==width*dpr||c.height!==height*dpr){c.width=width*dpr;c.height=height*dpr;}g.setTransform(dpr,0,0,dpr,0,0);g.clearRect(0,0,width,height);
+ const t=(now-apocalypseState.start)/1000,cx=width/2,cy=height*(width<=680?.39:.44),unit=Math.min(width,height),stage=apocalypseState.phase,force=stage==='awakening'?.2:stage==='unbinding'?.6:stage==='rupture'?1.4:stage==='annihilation'?2:1.1;
+ if(reduced)return;
+ const colors=['#b9d397','#78c6bf','#b4a0de','#e8c57c','#f19a87','#e3e9d0'];g.lineWidth=1;
+ const haze=g.createRadialGradient(cx,cy,0,cx,cy,unit*.75);haze.addColorStop(0,stage==='annihilation'?'#ee603124':'#754aa530');haze.addColorStop(.4,'#30539118');haze.addColorStop(1,'#0000');g.fillStyle=haze;g.fillRect(0,0,width,height);
+ for(let i=0;i<(width<680?180:420);i++){
+  const k=(i*.618+t*.08*force)%1,a=i*2.399+t*(i%2?1:-1)*.15*force,r=(stage==='annihilation'?1-k:k)*Math.max(width,height)*.85;
+  g.strokeStyle=colors[i%6];g.globalAlpha=.16+k*.6;g.beginPath();g.moveTo(cx+Math.cos(a)*r,cy+Math.sin(a)*r*.8);g.lineTo(cx+Math.cos(a+.013*force)*(r+5+k*force*65),cy+Math.sin(a+.013*force)*(r+5+k*force*65)*.8);g.stroke();
+ }
+ if(stage!=='awakening'){
+  g.save();g.translate(cx,cy);g.rotate(t*.025);
+  for(let i=0;i<14;i++){const a=i*Math.PI*2/14,r=unit*.3;g.strokeStyle=colors[i%6];g.globalAlpha=.45;g.lineWidth=i%3?1:2;g.beginPath();g.moveTo(Math.cos(a)*r*.35,Math.sin(a)*r*.35);for(let j=1;j<7;j++){const rr=r*(j*.38),aa=a+Math.sin(i*7+j*3)*.11;g.lineTo(Math.cos(aa)*rr,Math.sin(aa)*rr);}g.stroke();}g.restore();
+ }
+ if(stage==='rupture'||stage==='annihilation'||stage==='revelation'){
+  for(let i=0;i<6;i++){const k=(t*.28+i/6)%1;g.globalAlpha=(1-k)*.45;g.strokeStyle=colors[i];g.lineWidth=2;g.beginPath();g.ellipse(cx,cy,k*unit*1.4,k*unit*.85,i*.4,0,Math.PI*2);g.stroke();}
+ }
+ g.globalAlpha=1;g.lineWidth=1;
+}
 function animate(now){
  requestAnimationFrame(animate);if(document.hidden||now-lastFrame<(reduced?150:30))return;lastFrame=now;
  const t=now*.00015;ctx.clearRect(0,0,width,height);
  for(const s of stars){const y=(s.y-now*.002*s.s+height*100)%height;ctx.beginPath();ctx.arc(s.x,y,s.r,0,Math.PI*2);ctx.fillStyle=`rgba(180,209,154,${.13+(Math.sin(t+s.t)+1)*.17})`;ctx.fill();}
- paintRitual(now);
+ paintRitual(now);if(apocalypseState)paintApocalypse(now);
 }
 window.addEventListener('resize',resize);resize();requestAnimationFrame(animate);updateCount();
